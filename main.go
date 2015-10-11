@@ -24,14 +24,13 @@ func SplitByChar (baseChar string) func (str string) []string {
         arrayBracketCount := 0
         objectBracketCount := 0
         currStr := ""
-        prevCh := ""
         for i := 0; i < len(str); i++ {
             ch := string(str[i])
             if ch == "\"" {
-                doubleStringOpen := !doubleStringOpen
+                doubleStringOpen = !doubleStringOpen
             }
             if ch == "'" {
-                singleStringOpen := !singleStringOpen
+                singleStringOpen = !singleStringOpen
             }
             if ch == "[" {
                 arrayBracketCount += 1
@@ -54,20 +53,18 @@ func SplitByChar (baseChar string) func (str string) []string {
                 }
             }
             if
-                ch == baseChar && 
-                !doubleStringOpen && 
-                !singleStringOpen && 
-                !arrayOpen&& 
+                ch == baseChar &&
+                !doubleStringOpen &&
+                !singleStringOpen &&
+                !arrayOpen &&
                 !objectOpen {
                 if currStr != ""  {
                     appendedStr := strings.TrimSpace(currStr)
-                    result := append(result, appendedStr)
+                    result = append(result, appendedStr)
                 }
                 currStr = "";
-                prevCh = "";
             } else {
               currStr += ch;
-              prevCh = ch;
             }
         }
         if currStr != "" {
@@ -78,7 +75,7 @@ func SplitByChar (baseChar string) func (str string) []string {
     }
 }
 
-func ParseJSON (str string) string {
+func ParseJSON (str string) interface{} {
     IsArray := FirstAndLastChars("[", "]")
     IsObj := FirstAndLastChars("{", "}")
     HasDoubleQuotes := FirstAndLastChars("\"", "\"")
@@ -91,7 +88,11 @@ func ParseJSON (str string) string {
     }
     IsNumber := func (str string) bool {
         floatValue, err := strconv.ParseFloat(str, 64)
-        return string(floatValue) == str
+        if err != nil {
+            log.Println(err)
+        }
+        floatString := strconv.FormatFloat(floatValue, 'f', 6, 64)
+        return floatString == str
     }
     RemoveFirstAndLastChar := func (str string) string {
         // Do I need to only trim space or is there something else
@@ -100,25 +101,31 @@ func ParseJSON (str string) string {
         return str[1:len(str) - 1]
     }
     SeparateStringByCommans := SplitByChar(",")
-    SeparateStringByColons := SplitByChar(":")
+    // SeparateStringByColons := SplitByChar(":")
 
     str = strings.TrimSpace(str)
     if IsArray (str) {
         var arrParts []interface{}
-        strParts := (RemoveFirstAndLastChar(str))
+        strParts := SeparateStringByCommans(RemoveFirstAndLastChar(str))
         for i := 0; i < len(strParts); i++ {
             arrParts = append(arrParts, ParseJSON(strParts[i]))
         }
         return strParts
     }
     if IsObj(str) {
+        // TODO: Handle objects
         return true
     }
     if IsString (str) {
         return RemoveFirstAndLastChar(str)
     }
     if IsNumber (str) {
-        return strconv.ParseFloat(str, 64)
+        floatValue, err := strconv.ParseFloat(str, 64)
+        if err != nil {
+            // TODO: Proper error handling
+             log.Println(err)
+        }
+        return floatValue
     }
     if str == "nil" {
         return nil
@@ -129,8 +136,8 @@ func ParseJSON (str string) string {
     if str == "true" {
         return true
     }
-    parsedJSONString := ""
-    return parsedJSONString
+    // TODO: Throw error
+    return false
 }
 
 func main() {
