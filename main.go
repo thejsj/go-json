@@ -17,8 +17,8 @@ func FirstAndLastChars (first string, last string) func (str string) bool {
 func SplitByChar (baseChar string) func (str string) []string {
     return func (str string) []string {
         var result []string;
-        doubleStringOpen := true
-        singleStringOpen := true
+        doubleStringOpen := false
+        singleStringOpen := false
         arrayOpen := false
         objectOpen := false
         arrayBracketCount := 0
@@ -101,7 +101,7 @@ func ParseJSON (str string) interface{} {
         return str[1:len(str) - 1]
     }
     SeparateStringByCommans := SplitByChar(",")
-    // SeparateStringByColons := SplitByChar(":")
+    SeparateStringByColons := SplitByChar(":")
 
     str = strings.TrimSpace(str)
     if IsArray (str) {
@@ -114,7 +114,22 @@ func ParseJSON (str string) interface{} {
     }
     if IsObj(str) {
         // TODO: Handle objects
-        return true
+        var obj map[string]interface{}
+        objParts := SeparateStringByCommans(RemoveFirstAndLastChar(str))
+        for i := 0; i < len(objParts); i++ {
+            subObject := objParts[i]
+            keyValuePair := SeparateStringByColons(subObject)
+            if len(keyValuePair) == 2 {
+                key := ParseJSON(keyValuePair[0])
+                value := ParseJSON(keyValuePair[1])
+                keyString, isString := key.(string)
+                if isString {
+                    // NOTE: Throws error `panic: assignment to entry in nil map`
+                    obj[keyString] = value
+                }
+            }
+        }
+        return obj
     }
     if IsString (str) {
         return RemoveFirstAndLastChar(str)
