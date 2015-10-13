@@ -1,20 +1,24 @@
-package main;
+package main
 
 import (
-    "io/ioutil"
-    "github.com/thejsj/go-json/parser"
-    "log"
-    "os"
+	"github.com/thejsj/go-json/parser"
+	"io/ioutil"
+	"log"
+	"os"
 )
 
 func main() {
-    bytes, err := ioutil.ReadAll(os.Stdin)
-    inputString := string(bytes)
+	bytes, err := ioutil.ReadAll(os.Stdin)
+	inputString := string(bytes)
 
-    if err != nil {
-        log.Fatal(err)
-    }
+	if err != nil {
+		log.Fatal(err)
+	}
 
-    parsedJSONString := parser.ParseJSON(inputString)
-    log.Println(parsedJSONString)
+	parsedJSON, err := parser.ParseJSON(inputString)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(parsedJSON)
+
 }
