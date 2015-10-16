@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/thejsj/go-json/parser"
+	"github.com/thejsj/go-json/printer"
 	"io/ioutil"
 	"log"
 	"os"
@@ -19,6 +20,5 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Println(parsedJSON)
-
+	printer.PrintJSON(parsedJSON)
 }
