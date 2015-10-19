@@ -64,7 +64,7 @@ func convertJSONToString(copy, original reflect.Value) (string, error) {
 			}
 			allElements = append(allElements, str)
 		}
-		return strings.Join(allElements[:],","), nil
+		return "[" + strings.Join(allElements[:],",") + "]", nil
 
 	// If it is a map we create a new map and translate each value
 	case reflect.Map:
@@ -74,21 +74,24 @@ func convertJSONToString(copy, original reflect.Value) (string, error) {
 			originalValue := original.MapIndex(key)
 			// New gives us a pointer, but again we want the value
 			copyValue := reflect.New(originalValue.Type()).Elem()
-			str, err := convertJSONToString(copyValue, originalValue)
-			if err != nil {
-				return "", err
+			keyStr, keyErr := convertJSONToString(copyValue, originalValue)
+			valueStr, valueErr := convertJSONToString(copyValue, originalValue)
+			if valueErr != nil {
+				return "", valueErr
 			}
-			allElements = append(allElements, str)
+			if keyErr != nil {
+				return "", keyErr
+			}
+			allElements = append(allElements, keyStr + ":" + valueStr)
 		}
-		return strings.Join(allElements[:],","), nil
+		return "{" + strings.Join(allElements[:],",") + "}", nil
 
 	// Otherwise we cannot traverse anywhere so this finishes the the recursion
 
 	// If it is a string translate it (yay finally we're doing what we came for)
 	case reflect.String:
 		translatedString := original.Interface().(string)
-		copy.SetString(translatedString)
-		return translatedString, nil
+		return "\"" + translatedString + "\"", nil
 
 	// And everything else will simply be taken from the original
 	default:

@@ -5,6 +5,7 @@ import (
 	"github.com/thejsj/go-json/printer"
 	"io/ioutil"
 	"log"
+	"fmt"
 	"os"
 )
 
@@ -20,5 +21,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	printer.PrintJSON(parsedJSON)
+	str, err := printer.PrintJSON(parsedJSON)
+	if err != nil {
+		 log.Fatal(err)
+	}
+	fmt.Println(str)
 }
