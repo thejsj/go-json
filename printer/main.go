@@ -7,7 +7,7 @@ import (
 )
 
 // Code taken from: https://gist.github.com/hvoecking/10772475
-func convertJSONToString(copy, original reflect.Value) (string, error) {
+func convertJSONToString(original reflect.Value) (string, error) {
 	switch original.Kind() {
 	// The first cases handle nested structures and translate them recursively
 
@@ -23,9 +23,8 @@ func convertJSONToString(copy, original reflect.Value) (string, error) {
 			return "", err
 		}
 		// Allocate a new object and set the pointer to it
-		copy.Set(reflect.New(originalValue.Type()))
 		// Unwrap the newly created pointer
-		return convertJSONToString(copy.Elem(), originalValue)
+		return convertJSONToString(originalValue)
 
 	// If it is an interface (which is very similar to a pointer), do basically the
 	// same as for the pointer. Though a pointer is not the same as an interface so
@@ -36,16 +35,12 @@ func convertJSONToString(copy, original reflect.Value) (string, error) {
 		originalValue := original.Elem()
 		// Create a new object. Now new gives us a pointer, but we want the value it
 		// points to, so we have to call Elem() to unwrap it
-		copyValue := reflect.New(originalValue.Type()).Elem()
-		convertJSONToString(copyValue, originalValue)
-		copy.Set(copyValue)
-		return convertJSONToString(copy.Elem(), originalValue)
+		return convertJSONToString(originalValue)
 
-	// If it is a struct we translate each field
 	case reflect.Struct:
 		var allElements []string
 		for i := 0; i < original.NumField(); i += 1 {
-		  str, err := convertJSONToString(copy.Field(i), original.Field(i))
+		  str, err := convertJSONToString(original.Field(i))
 			if err != nil {
 				return "", err
 			}
@@ -56,9 +51,8 @@ func convertJSONToString(copy, original reflect.Value) (string, error) {
 	// If it is a slice we create a new slice and translate each element
 	case reflect.Slice:
 		var allElements []string
-		copy.Set(reflect.MakeSlice(original.Type(), original.Len(), original.Cap()))
 		for i := 0; i < original.Len(); i += 1 {
-		  str, err := convertJSONToString(copy.Index(i), original.Index(i))
+		  str, err := convertJSONToString(original.Index(i))
 			if err != nil {
 				return "", err
 			}
@@ -69,13 +63,13 @@ func convertJSONToString(copy, original reflect.Value) (string, error) {
 	// If it is a map we create a new map and translate each value
 	case reflect.Map:
 		var allElements []string
+		copy := reflect.New(original.Type()).Elem()
 		copy.Set(reflect.MakeMap(original.Type()))
 		for _, key := range original.MapKeys() {
 			originalValue := original.MapIndex(key)
 			// New gives us a pointer, but again we want the value
-			copyValue := reflect.New(originalValue.Type()).Elem()
-			keyStr, keyErr := convertJSONToString(copyValue, originalValue)
-			valueStr, valueErr := convertJSONToString(copyValue, originalValue)
+			keyStr, keyErr := convertJSONToString(key)
+			valueStr, valueErr := convertJSONToString(originalValue)
 			if valueErr != nil {
 				return "", valueErr
 			}
@@ -95,19 +89,15 @@ func convertJSONToString(copy, original reflect.Value) (string, error) {
 
 	// And everything else will simply be taken from the original
 	default:
-		copy.Set(original)
 		return "--default--", nil
 	}
 	return "", nil
-
 }
 
 func PrintJSON(parsedJSON interface{}) (string, error){
 	// Wrap the original in a reflect.Value
 	original := reflect.ValueOf(parsedJSON)
-
-	copy := reflect.New(original.Type()).Elem()
-	str, err := convertJSONToString(copy, original)
+	str, err := convertJSONToString(original)
 	if err != nil {
 		 return "", err
 	}
