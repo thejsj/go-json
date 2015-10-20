@@ -20,3 +20,9 @@ parsedJSON, err := parser.ParseJSON("{ \"hello\": 1 }")
 - Pretty print to STDOUT
 - STDERR if there's an error
 - Switch away from `interface {}`
+
+## Testing
+
+```
+go test ./...
+```
