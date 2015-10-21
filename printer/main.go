@@ -4,14 +4,14 @@ import (
 	"reflect"
 	"strings"
 	"errors"
+	"strconv"
 )
 
 // Code taken from: https://gist.github.com/hvoecking/10772475
 func convertJSONToString(original reflect.Value) (string, error) {
 	switch original.Kind() {
 
-	case reflect.Ptr:
-	case reflect.Interface:
+	case reflect.Ptr, reflect.Interface:
 		// To get the actual value of the original we have to call Elem()
 		// At the same time this unwraps the pointer so we don't end up in
 		// an infinite recursion
@@ -68,11 +68,19 @@ func convertJSONToString(original reflect.Value) (string, error) {
 		stringValue := original.Interface().(string)
 		return "\"" + stringValue + "\"", nil
 
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+		stringValue := string(strconv.FormatInt(original.Int(), 10))
+		return stringValue, nil
+
+	case reflect.Float32, reflect.Float64:
+		stringValue := string(strconv.FormatFloat(original.Float(), 'f', -1, 64))
+		return stringValue, nil
+
 	// And everything else will simply be taken from the original
 	default:
-		return "--default--", nil
+		return "", errors.New("No type recognizedfor value")
 	}
-	return "", nil
+	return "", errors.New("No string returned")
 }
 
 func PrintJSON(parsedJSON interface{}) (string, error){
@@ -80,7 +88,7 @@ func PrintJSON(parsedJSON interface{}) (string, error){
 	original := reflect.ValueOf(parsedJSON)
 	str, err := convertJSONToString(original)
 	if err != nil {
-		 return "", err
+		return "", err
 	}
 	return str, nil
 }
