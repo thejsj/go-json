@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestPrintJSON(t *testing.T) {
+func TestPrintJSONNumbers(t *testing.T) {
 	value, _ := printer.PrintJSON(5)
 	assert.Equal(t, value, "5", "PrintJSON should parse integers correctly")
 
@@ -15,4 +15,11 @@ func TestPrintJSON(t *testing.T) {
 
 	value2, _ := printer.PrintJSON(9999999)
 	assert.Equal(t, value2, "9999999", "PrintJSON should parse bigger integers correctly")
+
+	value3, _ := printer.PrintJSON(99.99999)
+	assert.Equal(t, value3, "99.99999", "PrintJSON should parse bigger integers correctly")
+}
+
+func TestPrintJSONString(t *testing.T) {
+
 }
