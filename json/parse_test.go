@@ -1,4 +1,4 @@
-package parse_json_test
+package json_test
 
 import "testing"
 

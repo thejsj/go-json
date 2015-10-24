@@ -1,4 +1,4 @@
-package to_json
+package json
 
 import (
 	"reflect"
