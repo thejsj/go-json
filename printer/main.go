@@ -35,7 +35,7 @@ func convertJSONToString(original reflect.Value) (string, error) {
 		}
 		return strings.Join(allElements[:],","), nil
 
-	case reflect.Slice:
+	case reflect.Slice, reflect.Array:
 		var allElements []string
 		for i := 0; i < original.Len(); i += 1 {
 		  str, err := convertJSONToString(original.Index(i))

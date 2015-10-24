@@ -21,5 +21,18 @@ func TestPrintJSONNumbers(t *testing.T) {
 }
 
 func TestPrintJSONString(t *testing.T) {
+	value, _ := printer.PrintJSON("hello")
+	assert.Equal(t, value, "\"hello\"", "PrintJSON should strings correctly")
 
+	value1, _ := printer.PrintJSON("\"wow\"")
+	assert.Equal(t, value1, "\"\"wow\"\"", "PrintJSON should parse strings with strings correctly")
+}
+
+func TestPrintJSONArray(t *testing.T) {
+	var arr [3]int
+	arr[0] = 0
+	arr[1] = 1
+	arr[2] = 2
+	arrString, _ := printer.PrintJSON(arr)
+	assert.Equal(t, "[0,1,2]", arrString, "PrintJSON should parse arrays of integeres correctly")
 }
