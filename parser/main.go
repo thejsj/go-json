@@ -6,6 +6,9 @@ import (
 	"strings"
 )
 
+// TODO Change order of functions
+// TODO Add init function and vars at the top
+
 func firstAndLastChars(first string, last string) func(str string) bool {
 	return func(str string) bool {
 		return string(str[0]) == first && str[len(str)-1:] == last

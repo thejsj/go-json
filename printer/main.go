@@ -9,6 +9,7 @@ import (
 
 // Code taken from: https://gist.github.com/hvoecking/10772475
 func convertJSONToString(original reflect.Value) (string, error) {
+
 	switch original.Kind() {
 
 	case reflect.Ptr, reflect.Interface:
@@ -52,15 +53,35 @@ func convertJSONToString(original reflect.Value) (string, error) {
 		copy.Set(reflect.MakeMap(original.Type()))
 		for _, key := range original.MapKeys() {
 			originalValue := original.MapIndex(key)
-			keyStr, keyErr := convertJSONToString(key)
-			valueStr, valueErr := convertJSONToString(originalValue)
-			if valueErr != nil {
-				return "", valueErr
+			if key.Kind() == reflect.String ||
+				key.Kind() == reflect.Int ||
+				key.Kind() == reflect.Int8 ||
+				key.Kind() == reflect.Int16 ||
+				key.Kind() == reflect.Int32 ||
+				key.Kind() == reflect.Int64 ||
+				key.Kind() == reflect.Float32  ||
+				key.Kind() == reflect.Float64 {
+
+				keyStr := key
+				if key.Kind() != reflect.String {
+					keyStrJSON, keyStrErr := convertJSONToString(key)
+					if keyStrErr != nil {
+						 return "", nil
+					}
+					keyStr = reflect.ValueOf(keyStrJSON)
+				}
+				keyJSON, keyErr := convertJSONToString(keyStr)
+				valueJSON, valueErr := convertJSONToString(originalValue)
+				if valueErr != nil {
+					return "", valueErr
+				}
+				if keyErr != nil {
+					return "", keyErr
+				}
+				allElements = append(allElements, keyJSON+ ":" + valueJSON)
+			} else {
+				return "", errors.New("Invalid key value")
 			}
-			if keyErr != nil {
-				return "", keyErr
-			}
-			allElements = append(allElements, keyStr + ":" + valueStr)
 		}
 		return "{" + strings.Join(allElements[:],",") + "}", nil
 
