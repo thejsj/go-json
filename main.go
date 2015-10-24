@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/thejsj/go-json/parser"
-	"github.com/thejsj/go-json/printer"
+	"github.com/thejsj/go-json/parse_json"
+	"github.com/thejsj/go-json/to_json"
 	"io/ioutil"
 	"log"
 	"fmt"
@@ -17,11 +17,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	parsedJSON, err := parser.ParseJSON(inputString)
+	parsedJSON, err := parse_json.ParseJSON(inputString)
 	if err != nil {
 		log.Fatal(err)
 	}
-	str, err := printer.PrintJSON(parsedJSON)
+	str, err := to_json.ToJSON(parsedJSON)
 	if err != nil {
 		 log.Fatal(err)
 	}

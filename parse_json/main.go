@@ -1,4 +1,4 @@
-package parser
+package parse_json
 
 import (
 	"errors"

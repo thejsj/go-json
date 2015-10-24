@@ -1,4 +1,4 @@
-package printer
+package to_json
 
 import (
 	"reflect"
@@ -8,7 +8,7 @@ import (
 )
 
 // Code taken from: https://gist.github.com/hvoecking/10772475
-func convertJSONToString(original reflect.Value) (string, error) {
+func toJSON(original reflect.Value) (string, error) {
 
 	switch original.Kind() {
 
@@ -23,12 +23,12 @@ func convertJSONToString(original reflect.Value) (string, error) {
 		}
 		// Allocate a new object and set the pointer to it
 		// Unwrap the newly created pointer
-		return convertJSONToString(originalValue)
+		return toJSON(originalValue)
 
 	case reflect.Struct:
 		var allElements []string
 		for i := 0; i < original.NumField(); i += 1 {
-		  str, err := convertJSONToString(original.Field(i))
+		  str, err := toJSON(original.Field(i))
 			if err != nil {
 				return "", err
 			}
@@ -39,7 +39,7 @@ func convertJSONToString(original reflect.Value) (string, error) {
 	case reflect.Slice, reflect.Array:
 		var allElements []string
 		for i := 0; i < original.Len(); i += 1 {
-		  str, err := convertJSONToString(original.Index(i))
+		  str, err := toJSON(original.Index(i))
 			if err != nil {
 				return "", err
 			}
@@ -64,14 +64,14 @@ func convertJSONToString(original reflect.Value) (string, error) {
 
 				keyStr := key
 				if key.Kind() != reflect.String {
-					keyStrJSON, keyStrErr := convertJSONToString(key)
+					keyStrJSON, keyStrErr := toJSON(key)
 					if keyStrErr != nil {
 						 return "", nil
 					}
 					keyStr = reflect.ValueOf(keyStrJSON)
 				}
-				keyJSON, keyErr := convertJSONToString(keyStr)
-				valueJSON, valueErr := convertJSONToString(originalValue)
+				keyJSON, keyErr := toJSON(keyStr)
+				valueJSON, valueErr := toJSON(originalValue)
 				if valueErr != nil {
 					return "", valueErr
 				}
@@ -104,10 +104,10 @@ func convertJSONToString(original reflect.Value) (string, error) {
 	return "", errors.New("No string returned")
 }
 
-func PrintJSON(parsedJSON interface{}) (string, error){
+func ToJSON(parsedJSON interface{}) (string, error){
 	// Wrap the original in a reflect.Value
 	original := reflect.ValueOf(parsedJSON)
-	str, err := convertJSONToString(original)
+	str, err := toJSON(original)
 	if err != nil {
 		return "", err
 	}
