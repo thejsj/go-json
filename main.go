@@ -1,10 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/thejsj/go-json/json"
 	"io/ioutil"
 	"log"
-	"fmt"
 	"os"
 )
 
@@ -22,7 +22,7 @@ func main() {
 	}
 	str, err := json.ToJSON(parsedJSON)
 	if err != nil {
-		 log.Fatal(err)
+		log.Fatal(err)
 	}
 	fmt.Println(str)
 }

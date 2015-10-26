@@ -1,9 +1,9 @@
 package json_test
 
 import (
-	"testing"
-	"github.com/thejsj/go-json/json"
 	"github.com/stretchr/testify/assert"
+	"github.com/thejsj/go-json/json"
+	"testing"
 )
 
 func TestToJSONNumbers(t *testing.T) {
@@ -63,7 +63,7 @@ func TestToJSONArray(t *testing.T) {
 
 func TestToJSONMap(t *testing.T) {
 	map1 := make(map[string]string)
-	map1["hello"] =  "world"
+	map1["hello"] = "world"
 	mapString1, _ := json.ToJSON(map1)
 	assert.Equal(t, "{\"hello\":\"world\"}", mapString1, "ToJSON should parse string maps correctly")
 
@@ -79,17 +79,13 @@ func TestToJSONMap(t *testing.T) {
 	mapString3, _ := json.ToJSON(map3)
 	assert.Equal(t, "{\"hello\":8,\"world\":12345678}", mapString3, "ToJSON should parse int maps correctly")
 
-	map4 := make(map[int]int)
-	map4[1] = 8
-	map4[2] = 12345678
-	mapString4, _ := json.ToJSON(map4)
-	assert.Equal(t, "{\"1\":8,\"2\":12345678}", mapString4, "ToJSON should parse int keys as strings")
-
-  type Node struct {
-		Next  *Node
-		Value interface{}
+	type Person struct {
+		name string
+		age  int
 	}
-	map5 := make(map[*Node]int)
+	map5 := make(map[*Person]int)
+	person := Person{name: "jorge", age: 26}
+	map5[&person] = 47
 	_, err := json.ToJSON(map5)
 	assert.NotNil(t, err, "ToJSON should throw an error when keys are not numbers or strings")
 }

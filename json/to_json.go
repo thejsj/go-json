@@ -1,10 +1,10 @@
 package json
 
 import (
-	"reflect"
-	"strings"
 	"errors"
+	"reflect"
 	"strconv"
+	"strings"
 )
 
 // Code taken from: https://gist.github.com/hvoecking/10772475
@@ -28,24 +28,24 @@ func toJSON(original reflect.Value) (string, error) {
 	case reflect.Struct:
 		var allElements []string
 		for i := 0; i < original.NumField(); i += 1 {
-		  str, err := toJSON(original.Field(i))
+			str, err := toJSON(original.Field(i))
 			if err != nil {
 				return "", err
 			}
 			allElements = append(allElements, str)
 		}
-		return strings.Join(allElements[:],","), nil
+		return strings.Join(allElements[:], ","), nil
 
 	case reflect.Slice, reflect.Array:
 		var allElements []string
 		for i := 0; i < original.Len(); i += 1 {
-		  str, err := toJSON(original.Index(i))
+			str, err := toJSON(original.Index(i))
 			if err != nil {
 				return "", err
 			}
 			allElements = append(allElements, str)
 		}
-		return "[" + strings.Join(allElements[:],",") + "]", nil
+		return "[" + strings.Join(allElements[:], ",") + "]", nil
 
 	case reflect.Map:
 		var allElements []string
@@ -53,37 +53,20 @@ func toJSON(original reflect.Value) (string, error) {
 		copy.Set(reflect.MakeMap(original.Type()))
 		for _, key := range original.MapKeys() {
 			originalValue := original.MapIndex(key)
-			if key.Kind() == reflect.String ||
-				key.Kind() == reflect.Int ||
-				key.Kind() == reflect.Int8 ||
-				key.Kind() == reflect.Int16 ||
-				key.Kind() == reflect.Int32 ||
-				key.Kind() == reflect.Int64 ||
-				key.Kind() == reflect.Float32  ||
-				key.Kind() == reflect.Float64 {
-
-				keyStr := key
-				if key.Kind() != reflect.String {
-					keyStrJSON, keyStrErr := toJSON(key)
-					if keyStrErr != nil {
-						 return "", nil
-					}
-					keyStr = reflect.ValueOf(keyStrJSON)
-				}
-				keyJSON, keyErr := toJSON(keyStr)
-				valueJSON, valueErr := toJSON(originalValue)
-				if valueErr != nil {
-					return "", valueErr
-				}
-				if keyErr != nil {
-					return "", keyErr
-				}
-				allElements = append(allElements, keyJSON+ ":" + valueJSON)
-			} else {
-				return "", errors.New("Invalid key value")
+			if key.Kind() != reflect.String {
+				return "", errors.New("Given key is not a string")
 			}
+			keyJSON, keyErr := toJSON(key)
+			valueJSON, valueErr := toJSON(originalValue)
+			if valueErr != nil {
+				return "", valueErr
+			}
+			if keyErr != nil {
+				return "", keyErr
+			}
+			allElements = append(allElements, keyJSON+":"+valueJSON)
 		}
-		return "{" + strings.Join(allElements[:],",") + "}", nil
+		return "{" + strings.Join(allElements[:], ",") + "}", nil
 
 	case reflect.String:
 		stringValue := original.Interface().(string)
@@ -104,7 +87,7 @@ func toJSON(original reflect.Value) (string, error) {
 	return "", errors.New("No string returned")
 }
 
-func ToJSON(parsedJSON interface{}) (string, error){
+func ToJSON(parsedJSON interface{}) (string, error) {
 	// Wrap the original in a reflect.Value
 	original := reflect.ValueOf(parsedJSON)
 	str, err := toJSON(original)

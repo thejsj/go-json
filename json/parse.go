@@ -6,8 +6,46 @@ import (
 	"strings"
 )
 
-// TODO Change order of functions
-// TODO Add init function and vars at the top
+var isArray func(str string) bool
+var isObj func(str string) bool
+var hasSingleQuotes func(str string) bool
+var hasDoubleQuotes func(str string) bool
+var isString func(str string) bool
+var isNumber func(str string) bool
+var removeFirstAndLastChar func(str string) string
+var separateStringByCommas func(str string) []string
+var separateStringByColons func(str string) []string
+
+func init() {
+	isArray = firstAndLastChars("[", "]")
+	isObj = firstAndLastChars("{", "}")
+	hasDoubleQuotes = firstAndLastChars("\"", "\"")
+	hasSingleQuotes = firstAndLastChars("''", "''")
+	isString = func(str string) bool {
+		// Do I need to only trim space or is there something else
+		// that need to get trimmed?
+		str = strings.TrimSpace(str)
+		return (hasSingleQuotes(str) || hasDoubleQuotes(str)) && str[len(str)-2:] != "\\"
+	}
+	isNumber = func(str string) bool {
+		floatValue, floatErr := strconv.ParseFloat(str, 64)
+		intValue, intErr := strconv.ParseInt(str, 10, 64)
+		if floatErr != nil && intErr != nil {
+			return false
+		}
+		floatString := strconv.FormatFloat(floatValue, 'f', 6, 64)
+		intString := strconv.FormatInt(intValue, 16)
+		return floatString == str || intString == str
+	}
+	removeFirstAndLastChar = func(str string) string {
+		// Do I need to only trim space or is there something else
+		// that need to get trimmed?
+		str = strings.TrimSpace(str)
+		return str[1 : len(str)-1]
+	}
+	separateStringByCommas = splitByChar(",")
+	separateStringByColons = splitByChar(":")
+}
 
 func firstAndLastChars(first string, last string) func(str string) bool {
 	return func(str string) bool {
@@ -76,39 +114,10 @@ func splitByChar(baseChar string) func(str string) []string {
 }
 
 func ParseJSON(str string) (interface{}, error) {
-	isArray := firstAndLastChars("[", "]")
-	isObj := firstAndLastChars("{", "}")
-	hasDoubleQuotes := firstAndLastChars("\"", "\"")
-	hasSingleQuotes := firstAndLastChars("''", "''")
-	isString := func(str string) bool {
-		// Do I need to only trim space or is there something else
-		// that need to get trimmed?
-		str = strings.TrimSpace(str)
-		return (hasSingleQuotes(str) || hasDoubleQuotes(str)) && str[len(str)-2:] != "\\"
-	}
-	isNumber := func(str string) bool {
-		floatValue, floatErr := strconv.ParseFloat(str, 64)
-		intValue, intErr := strconv.ParseInt(str, 10, 64)
-		if floatErr != nil && intErr != nil {
-			return false
-		}
-		floatString := strconv.FormatFloat(floatValue, 'f', 6, 64)
-		intString := strconv.FormatInt(intValue, 16)
-		return floatString == str || intString == str
-	}
-	removeFirstAndLastChar := func(str string) string {
-		// Do I need to only trim space or is there something else
-		// that need to get trimmed?
-		str = strings.TrimSpace(str)
-		return str[1 : len(str)-1]
-	}
-	separateStringByCommans := splitByChar(",")
-	separateStringByColons := splitByChar(":")
-
 	str = strings.TrimSpace(str)
 	if isArray(str) {
 		var arrParts []interface{}
-		strParts := separateStringByCommans(removeFirstAndLastChar(str))
+		strParts := separateStringByCommas(removeFirstAndLastChar(str))
 		for i := 0; i < len(strParts); i++ {
 			newPart, err := ParseJSON(strParts[i])
 			if err != nil {
@@ -121,7 +130,7 @@ func ParseJSON(str string) (interface{}, error) {
 	if isObj(str) {
 		var obj map[string]interface{}
 		obj = make(map[string]interface{})
-		objParts := separateStringByCommans(removeFirstAndLastChar(str))
+		objParts := separateStringByCommas(removeFirstAndLastChar(str))
 		for i := 0; i < len(objParts); i++ {
 			subObject := objParts[i]
 			keyValuePair := separateStringByColons(subObject)
