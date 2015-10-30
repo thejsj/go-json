@@ -8,6 +8,16 @@ import (
 	"os"
 )
 
+
+var isArray func(str string) bool
+var ToJSON func(parsedJSON interface{}) (string, error)
+var ParseJSON func(str string) (interface{}, error)
+
+func init () {
+	ToJSON = json.ToJSON
+	ParseJSON = json.ParseJSON
+}
+
 func main() {
 	bytes, err := ioutil.ReadAll(os.Stdin)
 	inputString := string(bytes)
