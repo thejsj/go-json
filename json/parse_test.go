@@ -1,7 +1,11 @@
 package json_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test1(t *testing.T) {
-	t.Log("Hello World")
+	assert.Equal(t, true, true)
 }

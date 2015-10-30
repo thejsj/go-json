@@ -1,12 +1,12 @@
-package main_test
+package main
 
 import (
-	"github.com/stretchr/testify/assert"
-	"github.com/thejsj/go-json/"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func Test1(t *testing.T) {
-	val, _ := main.ToJSON(5)
+	val, _ := ToJSON(5)
 	assert.Equal(t, val, "5")
 }
